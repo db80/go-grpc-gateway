@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/api/annotations.proto";
+
+service BookService {
+    rpc Add(BookRequest) returns (BookResponse) {
+        option (google.api.http) = {
+            post: "/books"
+            body: "*"
+        };
+    }
+
+    rpc Get(BookRequest) returns (BookResponse) {
+        option (google.api.http) = {
+            get: "/books/{book_id}"
+        };
+    }
+
+    rpc Update(BookRequest) returns (BookResponse) {
+        option (google.api.http) = {
+            put: "/books/{book_id}"
+        };
+    }
+
+    rpc Delete(BookRequest) returns (BookResponse) {
+        option (google.api.http) = {
+            delete: "/books/{book_id}"
+        };
+    }
+
+    rpc Filter(FilterRequest) returns (FilterResponse) {
+        option (google.api.http) = {
+            get: "/books"
+        };
+    }
+}
+
+message FilterRequest {
+    //these below are query params
+    int32 page = 1;
+    int32 size = 2;
+}
+
+message FilterResponse {
+    repeated Book book = 1;
+}
+
+message BookRequest {
+    oneof book_req{
+        Book book = 1;
+        int32 book_id = 2;
+    }
+}
+
+message BookResponse{
+    Book book = 1;
+}
+
+// domain
+message Book {
+    int32 book_id = 1;
+    string isbn = 2;
+    string title = 3;
+    string author = 4;
+}
+
