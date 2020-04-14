@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package proto;
+
+service ArgentWallet {
+    rpc Register(RegisterRequest) returns (RegisterResponse) {}
+
+    rpc Verify(VerifyRequest) returns (VerifyResponse) {}
+
+    rpc NewWallet(NewWalletRequest) returns (NewWalletResponse) {}
+
+    rpc GetWallet(GetWalletRequest) returns (GetWalletResponse) {}
+}
+
+// message used to register a new address / user
+message RegisterRequest {
+    string address = 1;
+}
+
+message RegisterResponse {
+    string signature_code = 1;
+    string api_key = 2;
+}
+
+// message used to request a new wallet
+message VerifyRequest {
+    string signature = 1;
+}
+
+message VerifyResponse {
+    bool verified = 1;
+}
+
+// message used to transfer amount
+message NewWalletRequest {}
+
+message NewWalletResponse {
+    bool accepted = 1;
+}
+
+// message used to delete a wallet
+message GetWalletRequest {}
+
+message GetWalletResponse {
+    string address = 1;
+}

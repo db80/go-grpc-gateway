@@ -1,16 +1,17 @@
 package main
 
 import (
-	"matemo.net/go-grpc-gateway/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
+	"log"
+	"matemo.net/go-grpc-gateway/proto"
 	"net"
 	"net/http"
 	"os"
-	"time"
 	"os/signal"
-	"log"
+	"time"
 )
 
 func main() {
@@ -30,30 +31,31 @@ func main() {
 		mux.GetForwardResponseOptions()
 		opts := []grpc.DialOption{grpc.WithInsecure()}
 
-		err := proto.RegisterBookServiceHandlerFromEndpoint(ctx, mux, "localhost:8001", opts)
+		err := proto.RegisterBookServiceHandlerFromEndpoint(ctx, mux, "daniele:8001", opts)
 		if err != nil {
 			log.Fatalf("failed to start http server: %v", err)
 		}
 
-		httpServer = &http.Server{Addr: ":8000", Handler: mux}
+		httpServer = &http.Server{Addr: "localhost:8000", Handler: mux}
 		httpServer.ListenAndServe()
 	}()
 
 	//starting grpc server
 	go func() {
-		lis, err := net.Listen("tcp", "localhost:8001")
+		lis, err := net.Listen("tcp", "daniele:8001")
 
 		if err != nil {
 			log.Fatalf("failed to start grpc server : %v", err)
 		}
 
-		grpcServer = grpc.NewServer()
+		grpcServer = grpc.NewServer(withServerUnaryInterceptor())
 		proto.RegisterBookServiceServer(grpcServer, NewBookService())
 
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Fatalf("failed to serve grpc: %v", err)
 		}
 	}()
+	log.Print("Services are running")
 
 	//graceful shutdown servers
 	signals := make(chan os.Signal, 1)
@@ -74,4 +76,22 @@ func main() {
 	}
 
 	log.Print("Shutdown the server")
+}
+
+func withServerUnaryInterceptor() grpc.ServerOption {
+	return grpc.UnaryInterceptor(serverInterceptor)
+}
+
+func serverInterceptor(
+	ctx context.Context,
+	req interface{},
+	info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler,
+	) (interface{}, error) {
+
+	metadata.FromIncomingContext(ctx)
+	// Calls the handler
+	h, err := handler(ctx, req)
+
+	return h, err
 }

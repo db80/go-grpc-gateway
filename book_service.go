@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"matemo.net/go-grpc-gateway/proto"
 	"log"
+	"matemo.net/go-grpc-gateway/proto"
 )
 
 type BookService struct {}
@@ -20,7 +20,6 @@ func (s *BookService) Add(ctx context.Context, request *proto.BookRequest) (*pro
 
 func (s *BookService) Get(ctx context.Context, request *proto.BookRequest) (*proto.BookResponse, error) {
 	log.Printf("Get Book with Id %d", request.GetBookId())
-
 	return &proto.BookResponse{}, nil
 }
 
